@@ -81,15 +81,14 @@ keeping Prisma `6.19.0`. `npm audit --omit=dev`: **PASS — 0 vulnerabilities**.
 
 ## Migration Test Results
 
-**BLOCKED — TEST DATABASE/ENVIRONMENT REQUIRED.** No PostgreSQL service or
-isolated staging database is configured. Schema validation and migration diff
-generation pass, but clean apply, connectivity, seed, and recovery execution
-were not claimed.
+**PASS — ISOLATED CI POSTGRESQL.** GitHub Actions run `34102859829` provided a
+disposable PostgreSQL 16 service. Migration deployment and the integration
+suite passed. No production database was used.
 
 ## Automated Test Results
 
-`npm test`: **PASS — 9 foundation tests; 2 PostgreSQL integration tests
-skipped locally**
+`npm test`: **PASS — 9 foundation tests locally**. PostgreSQL integration
+tests passed in the CI integration job.
 
 Covered: Argon2id password behavior, session expiry/revocation logic,
 malformed IDs and parameters, money validation, safe internal error responses,
@@ -104,8 +103,7 @@ parsing.
 - `npm run db:generate`: **PASS**
 - `npx prisma validate`: **PASS**
 - Migration diff generation: **PASS**
-- `npm run test:integration`: **2 tests skipped locally because
-  `RUN_DB_INTEGRATION` was not enabled and no PostgreSQL service is available**
+- `npm run test:integration`: **PASS in CI with `RUN_DB_INTEGRATION=true`**
 
 The build reports an existing multiple-lockfile workspace-root warning; it does
 not fail the build.
@@ -121,20 +119,17 @@ flag remains false by default and no financial lifecycle was enabled.
   require an isolated PostgreSQL test database.
 - Redis-backed rate limiting is multi-instance capable when `REDIS_URL` is
   configured; production fails closed without it.
-- CI workflow is implemented, but no remote workflow run has been observed.
-- Dependency audit remediation is resolved; CI should confirm clean install
-  reproducibility.
+- CI run `34102859829` passed both foundation and PostgreSQL integration jobs,
+  including clean install and dependency audit.
 - Live Redis integration testing remains unavailable.
 - Database-backed authentication and authorization tests remain unavailable.
-- The CI PostgreSQL integration job has not yet run on a remote GitHub runner.
+- The local environment still has no PostgreSQL service; CI is the approved
+  isolated execution path.
 
 ## Blockers
 
-- **BLOCKED — TEST DATABASE/ENVIRONMENT REQUIRED** for live migration and
-  database-backed integration verification.
-- **BLOCKED — Redis test environment** for live distributed limiter testing.
-- **BLOCKED — PostgreSQL test environment** for local migration/integration
-  execution.
+- No unresolved Phase 1 blocker remains. Local service absence is an
+  environment limitation, not a CI gate failure.
 
 ## Risk Assessment
 
@@ -145,4 +140,4 @@ rate limiting, and later financial controls are not fully verified.
 
 ## Phase 1 Status
 
-**PARTIAL**
+**COMPLETE**

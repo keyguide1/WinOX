@@ -32,8 +32,8 @@ surface, an accounting foundation, and security/risk records.
 
 ### Absent or partial
 
-- A minimal automated foundation test runner and CI workflow now exist;
-  a disposable PostgreSQL integration job is configured but not yet executed.
+- A minimal automated foundation test runner and CI workflow now exist; the
+  disposable PostgreSQL integration job passed remotely.
 - No live PostgreSQL/Redis/queue/object-storage deployment in this workspace.
 - No migrations have been applied to a live database; migration SQL exists.
 - No matchmaking, check-in, bracket, leaderboard, notification, WebSocket, or
@@ -56,14 +56,14 @@ surface, an accounting foundation, and security/risk records.
 | Prisma schema validation with `DATABASE_URL` | PASS |
 | Automated foundation tests | PASS: 9 foundation tests; 2 PostgreSQL integration tests skipped locally |
 | CI foundation | IMPLEMENTED: lint, typecheck, Prisma generation/validation, tests, build |
-| Live migration test | BLOCKED locally: Prisma P1001; disposable CI job configured |
+| Live migration test | PASS in disposable CI PostgreSQL service |
 | Production dependency audit | PASS: 0 vulnerabilities after patched lockfile overrides |
 
 ## Phase status
 
 | Phase | Status | Evidence |
 | --- | --- | --- |
-| Phase 1 Foundation | PARTIAL | Core scaffold, auth, config, validation, request IDs, foundation tests, CI, distributed limiter, patched dependency chain, and disposable PostgreSQL job exist; live DB execution remains |
+| Phase 1 Foundation | COMPLETE | Core scaffold, auth, config, validation, request IDs, foundation tests, CI, distributed limiter, patched dependency chain, and passing disposable PostgreSQL migration/integration job |
 | Phase 2 Competition | PARTIAL | Games, tournaments, entries, matches, and pending result boundary exist; matchmaking and authoritative completion are absent |
 | Phase 3 Wallet/Payments | PARTIAL | Decimal ledger foundation and wallet read API exist; payment and withdrawal lifecycles are absent |
 | Phase 4 Security | PARTIAL | Sessions, login lockout, risk records, headers, and anti-cheat boundary exist; distributed controls and review workflows are absent |
@@ -77,15 +77,16 @@ surface, an accounting foundation, and security/risk records.
 
 - Real-money operations are not implemented end-to-end; activation must remain
   disabled.
-- Live database migration verification and database-backed integration tests are
-  configured for CI but have not executed in this environment.
+- Local live database migration verification remains unavailable; isolated CI
+  migration and database-backed integration tests passed.
 - No backup, restoration, queue recovery, or production monitoring evidence.
 
 ### High
 
 - Redis must be provisioned and configured for multi-instance rate limiting;
   production fails closed if it is absent or unavailable.
-- Prisma dependency audit is clean after patched transitive overrides; CI clean-install confirmation remains.
+- Prisma dependency audit is clean after patched transitive overrides; CI clean
+  install and audit passed.
 - Financial ledger application immutability is not equivalent to database-role
   immutability in production.
 - Match/result verification is incomplete and cannot support prize settlement.
@@ -98,9 +99,8 @@ surface, an accounting foundation, and security/risk records.
 
 ## Required next action
 
-The requested workflow requires Phase 1 to be verified before Phase 2 is
-considered complete. Phase 1 remains **PARTIAL**, not complete. The Prisma
-dependency blocker is remediated; database-backed tests and live migration
-execution remain blocked by unavailable isolated PostgreSQL infrastructure.
+The requested workflow verified Phase 1 through the passing foundation and
+isolated PostgreSQL CI jobs. Phase 1 is **COMPLETE** for its defined scope.
+Phase 2 remains out of scope and real-money functionality remains disabled.
 See `PHASE_1_VERIFICATION_REPORT.md` and
 `PHASE_1_BLOCKER_RESOLUTION_REPORT.md`.

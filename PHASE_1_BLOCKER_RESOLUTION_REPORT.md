@@ -6,9 +6,9 @@ Date: 2026-09-07
 
 ### Root cause
 
-This workspace has no Docker executable, Docker Compose runtime, `psql`
-client, local PostgreSQL service, or configured staging database. The only
-available database URL is a placeholder localhost URL.
+The local workspace has no Docker executable, Docker Compose runtime, `psql`
+client, or local PostgreSQL service. GitHub Actions supplied the approved
+isolated PostgreSQL 16 service.
 
 ### Action taken
 
@@ -34,17 +34,19 @@ available database URL is a placeholder localhost URL.
 - Local integration tests cannot execute without PostgreSQL.
 - Standard local tests report the two integration tests as skipped; they are
   not counted as passing integration tests.
-- The CI configuration provides the required disposable test environment but
-  has not executed on a remote GitHub runner in this session.
+- GitHub Actions run `34102859829` completed successfully. The
+  `postgres-integration` job applied the migration and ran the PostgreSQL
+  integration suite successfully.
 
 ### Remaining risk
 
-Migration application, table/constraint/index creation, CRUD, session
-persistence, and transaction rollback remain unverified in this environment.
+Local migration execution remains unavailable, but isolated CI verifies
+migration application, schema creation, constraints/indexes, CRUD, session
+persistence/revocation, and transaction rollback.
 
 ### Final disposition
 
-**BLOCKED — TEST DATABASE/ENVIRONMENT REQUIRED.**
+**RESOLVED — VERIFIED IN ISOLATED CI POSTGRESQL.**
 
 When PostgreSQL is available, execute from `win-ox`:
 
@@ -56,7 +58,7 @@ npm run db:migrate:deploy
 npm run test:integration
 ```
 
-The CI equivalent is the `postgres-integration` job in
+The repeatable CI procedure is the `postgres-integration` job in
 `.github/workflows/ci.yml`.
 
 ## Blocker 2: Prisma transitive dependency advisories
@@ -90,7 +92,8 @@ The root advisories are:
 - Inspected npm's proposed fix: it selects Prisma `6.12.0`, which is a
   downgrade and would require a separate compatibility/migration verification.
 - Did not apply `npm audit fix --force`.
-- Did not add arbitrary transitive overrides or suppress audit output.
+- Added narrowly scoped npm overrides only for the two vulnerable transitive
+  packages, without changing Prisma `6.19.0` or suppressing audit output.
 
 ### Exposure assessment
 
@@ -110,7 +113,8 @@ handlers, and real-money mode disabled.
 - Prisma `6.19.0` generation: PASS.
 - Prisma validation: PASS.
 - Migration diff generation: PASS.
-- Tests: PASS (9 foundation tests; integration tests gated).
+- Tests: PASS (9 foundation tests locally; PostgreSQL integration tests passed
+  in CI).
 - Lint: PASS.
 - Typecheck: PASS.
 - Production build: PASS.
@@ -136,6 +140,5 @@ validation passed.
 
 ## Overall disposition
 
-Phase 1 remains **PARTIAL** solely because PostgreSQL migration/integration
-execution and remote CI evidence are unavailable in this environment. No
-Phase 2 work or real-money activation was performed.
+Both original blockers are resolved with evidence. No Phase 2 work or
+real-money activation was performed.
