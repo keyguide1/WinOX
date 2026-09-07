@@ -42,13 +42,14 @@ payouts. Real-money functionality remains disabled.
 
 ## Frontend
 
-No frontend changes were required for this backend/API increment. Existing
-server-side authorization remains authoritative.
+Added responsive tournament discovery and detail pages at `/tournaments` and
+`/tournaments/[id]`. The UI includes loading, empty, error, game-filter, and
+demo-safety states. Existing server-side authorization remains authoritative.
 
 ## Next Phase 2 slice
 
-Add frontend tournament discovery/detail surfaces, then validate the new
-organizer and free demo-entry flows in CI before considering matchmaking.
+Validate this frontend increment in CI, then add authenticated demo entry UI
+and organizer management controls before considering matchmaking.
 
 ## Status
 
