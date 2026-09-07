@@ -21,6 +21,15 @@ test("validation rejects malformed identifiers and unsafe pagination", () => {
     }).success,
     false,
   );
+  assert.equal(
+    tournamentConfigSchema.safeParse({
+      name: "Future Cup",
+      gameId: "00000000-0000-0000-0000-000000000000",
+      capacity: 8,
+      startsAt: new Date(Date.now() - 1_000),
+    }).success,
+    false,
+  );
 });
 
 test("money parser rejects non-positive and non-finite values", () => {

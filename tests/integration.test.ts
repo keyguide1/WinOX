@@ -82,6 +82,49 @@ test("PostgreSQL transactions roll back failed writes", { skip: !integrationEnab
   assert.equal(await db.user.findUnique({ where: { email } }), null);
 });
 
+test("PostgreSQL preserves tournament ownership and duplicate-entry constraints", { skip: !integrationEnabled }, async () => {
+  const organizer = await db.user.create({
+    data: {
+      email: `${randomUUID()}@organizer.test`,
+      displayName: `organizer_${randomUUID().replaceAll("-", "").slice(0, 20)}`,
+      passwordHash: "argon2id-test-hash",
+      role: "ADMIN",
+    },
+  });
+  const game = await db.game.create({
+    data: {
+      slug: `integration-${randomUUID()}`,
+      name: "Integration Arena",
+      description: "Database integration game.",
+    },
+  });
+  const tournament = await db.tournament.create({
+    data: {
+      createdById: organizer.id,
+      gameId: game.id,
+      name: "Integration Cup",
+      rules: {},
+      capacity: 2,
+      startsAt: new Date(Date.now() + 60_000),
+      status: "OPEN",
+    },
+  });
+  assert.equal(
+    (await db.tournament.findUnique({ where: { id: tournament.id }, select: { createdById: true } }))?.createdById,
+    organizer.id,
+  );
+
+  await db.tournamentEntry.create({ data: { tournamentId: tournament.id, userId: organizer.id } });
+  await assert.rejects(
+    db.tournamentEntry.create({ data: { tournamentId: tournament.id, userId: organizer.id } }),
+    (error: unknown) => error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002",
+  );
+
+  await db.tournament.delete({ where: { id: tournament.id } });
+  await db.game.delete({ where: { id: game.id } });
+  await db.user.delete({ where: { id: organizer.id } });
+});
+
 test.after(async () => {
   if (integrationEnabled) await db.$disconnect();
 });

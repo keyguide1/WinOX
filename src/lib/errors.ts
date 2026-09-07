@@ -5,6 +5,8 @@ export type ApiErrorCode =
   | "NOT_FOUND"
   | "TOURNAMENT_FULL"
   | "DUPLICATE_ENTRY"
+  | "RATE_LIMITED"
+  | "TOURNAMENT_BUSY"
   | "INTERNAL_ERROR";
 
 export class AppError extends Error {

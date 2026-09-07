@@ -64,7 +64,7 @@ surface, an accounting foundation, and security/risk records.
 | Phase | Status | Evidence |
 | --- | --- | --- |
 | Phase 1 Foundation | COMPLETE | Core scaffold, auth, config, validation, request IDs, foundation tests, CI, distributed limiter, patched dependency chain, and passing disposable PostgreSQL migration/integration job |
-| Phase 2 Competition | PARTIAL | Games, tournaments, entries, matches, and pending result boundary exist; matchmaking and authoritative completion are absent |
+| Phase 2 Competition | IN PROGRESS | Game discovery, paginated tournament discovery, and validated organizer tournament creation are implemented; entry, matchmaking, and authoritative completion remain out of scope |
 | Phase 3 Wallet/Payments | PARTIAL | Decimal ledger foundation and wallet read API exist; payment and withdrawal lifecycles are absent |
 | Phase 4 Security | PARTIAL | Sessions, login lockout, risk records, headers, and anti-cheat boundary exist; distributed controls and review workflows are absent |
 | Phase 5 Admin | PARTIAL | Dashboard, player search, restriction workflow, and permission checks exist; full operations center is absent |

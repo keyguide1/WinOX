@@ -136,6 +136,7 @@ model User {
   riskSignals RiskSignal[]
   riskCases RiskCase[]
   realMoneyActivations RealMoneyActivation[]
+  createdTournaments Tournament[] @relation("TournamentOrganizer")
 }
 
 model Game {
@@ -162,7 +163,8 @@ model GameVersion {
 
 model Tournament {
   id          String           @id @default(uuid()) @db.Uuid
-  gameId      String           @db.Uuid
+  createdById  String?          @db.Uuid
+  gameId       String           @db.Uuid
   name        String
   rules       Json
   capacity    Int
@@ -170,11 +172,13 @@ model Tournament {
   status      TournamentStatus @default(DRAFT)
   createdAt   DateTime         @default(now())
   updatedAt   DateTime         @updatedAt
-  game        Game             @relation(fields: [gameId], references: [id])
+  organizer    User?            @relation("TournamentOrganizer", fields: [createdById], references: [id], onDelete: SetNull)
+  game         Game             @relation(fields: [gameId], references: [id])
   entries     TournamentEntry[]
   matches     Match[]
 
   @@index([status, startsAt])
+  @@index([createdById, startsAt])
 }
 
 model TournamentEntry {
