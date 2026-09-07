@@ -1,0 +1,42 @@
+import Link from "next/link";
+
+export default function Home() {
+  return (
+    <main className="min-h-screen bg-[var(--background)]">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <header className="flex h-20 items-center justify-between border-b border-[var(--line)]">
+          <Link href="/" className="flex items-center gap-3" aria-label="WinOX home">
+            <span className="grid h-9 w-9 place-items-center rounded-xl bg-[var(--lime)] text-sm font-black text-[#0b0d10]">W</span>
+            <span className="text-lg font-bold tracking-tight">win<span className="text-[var(--lime)]">ox</span></span>
+          </Link>
+          <nav className="hidden items-center gap-8 text-sm text-[var(--muted)] md:flex" aria-label="Primary navigation">
+            <a className="text-white" href="#games">Games</a><a className="transition hover:text-white" href="#tournaments">Tournaments</a><a className="transition hover:text-white" href="#leaderboard">Leaderboard</a><a className="transition hover:text-white" href="#wallet">Wallet</a>
+          </nav>
+          <div className="flex items-center gap-3"><a href="#login" className="hidden text-sm font-semibold text-[var(--muted)] transition hover:text-white sm:block">Log in</a><a href="#signup" className="rounded-lg bg-[var(--lime)] px-4 py-2.5 text-sm font-bold text-[#0b0d10] transition hover:brightness-110">Join free</a></div>
+        </header>
+
+        <section className="relative grid gap-12 overflow-hidden py-16 sm:py-24 lg:grid-cols-[1.1fr_.9fr] lg:items-center lg:py-32">
+          <div className="pointer-events-none absolute -right-40 -top-40 h-[28rem] w-[28rem] rounded-full bg-[var(--cyan)]/10 blur-3xl" />
+          <div className="relative">
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[var(--line)] bg-[var(--panel)] px-3 py-1.5 text-xs font-semibold text-[var(--cyan)]"><span className="h-1.5 w-1.5 rounded-full bg-[var(--cyan)]" /> The competitive gaming platform</div>
+            <h1 className="max-w-2xl text-5xl font-black leading-[1.02] tracking-[-0.04em] sm:text-7xl">Play sharp.<br /><span className="text-[var(--lime)]">Climb higher.</span></h1>
+            <p className="mt-6 max-w-xl text-base leading-7 text-[var(--muted)] sm:text-lg">Compete in skill-based tournaments, build your legacy, and find your next rival. Built for players who take the game seriously.</p>
+            <div className="mt-9 flex flex-col gap-3 sm:flex-row"><a href="#tournaments" className="rounded-lg bg-[var(--lime)] px-6 py-3.5 text-center text-sm font-bold text-[#0b0d10] transition hover:brightness-110">Explore tournaments <span aria-hidden="true">-&gt;</span></a><a href="#games" className="rounded-lg border border-[var(--line)] bg-[var(--panel)] px-6 py-3.5 text-center text-sm font-bold transition hover:border-slate-500">Browse games</a></div>
+            <div className="mt-12 flex gap-8 text-sm"><div><p className="text-2xl font-bold">24k<span className="text-[var(--lime)]">+</span></p><p className="mt-1 text-[var(--muted)]">Active players</p></div><div><p className="text-2xl font-bold">1.2k<span className="text-[var(--lime)]">+</span></p><p className="mt-1 text-[var(--muted)]">Weekly matches</p></div><div><p className="text-2xl font-bold">100<span className="text-[var(--lime)]">%</span></p><p className="mt-1 text-[var(--muted)]">Fair play</p></div></div>
+          </div>
+          <div className="relative"><div className="rounded-2xl border border-[var(--line)] bg-[var(--panel)] p-5 shadow-2xl shadow-black/20"><div className="flex items-center justify-between border-b border-[var(--line)] pb-4"><div><p className="text-xs uppercase tracking-[0.18em] text-[var(--muted)]">Live now</p><p className="mt-1 font-bold">Friday Night Rivals</p></div><span className="rounded-full bg-red-400/10 px-2.5 py-1 text-xs font-semibold text-red-300">● 128 playing</span></div><div className="my-5 rounded-xl bg-[#0b0f15] p-5"><div className="flex items-center justify-between text-xs text-[var(--muted)]"><span>Valorant · 5v5</span><span>Starts in 04:32</span></div><div className="mt-7 flex items-center justify-between"><div><div className="grid h-14 w-14 place-items-center rounded-xl bg-indigo-400/15 text-xl font-black text-indigo-300">N</div><p className="mt-2 text-center text-xs">NOVA</p></div><span className="text-2xl font-black text-[var(--muted)]">VS</span><div><div className="grid h-14 w-14 place-items-center rounded-xl bg-rose-400/15 text-xl font-black text-rose-300">R</div><p className="mt-2 text-center text-xs">RAVEN</p></div></div></div><div className="flex items-center justify-between"><div className="flex -space-x-2">{["JD","AK","MS","+"].map((initials) => <span key={initials} className="grid h-8 w-8 place-items-center rounded-full border-2 border-[var(--panel)] bg-[var(--panel-raised)] text-[10px] font-bold">{initials}</span>)}</div><span className="text-sm font-semibold text-[var(--lime)]">1st: 2,500 XP</span></div></div></div>
+        </section>
+
+        <section id="games" className="border-t border-[var(--line)] py-14"><div className="flex items-end justify-between"><div><p className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--lime)]">Choose your arena</p><h2 className="mt-2 text-2xl font-bold sm:text-3xl">Popular games</h2></div><a href="#all-games" className="text-sm font-semibold text-[var(--muted)] hover:text-white">View all -&gt;</a></div><div className="mt-7 grid grid-cols-2 gap-3 sm:grid-cols-4"><GameCard title="Valorant" type="Tactical FPS" accent="bg-indigo-400/20 text-indigo-200" icon="V" /><GameCard title="FC 26" type="Football" accent="bg-emerald-400/20 text-emerald-200" icon="FC" /><GameCard title="Apex Legends" type="Battle royale" accent="bg-rose-400/20 text-rose-200" icon="A" /><GameCard title="Street Fighter 6" type="Fighting" accent="bg-amber-400/20 text-amber-200" icon="6" /></div></section>
+
+        <section id="leaderboard" className="border-t border-[var(--line)] py-14"><div className="grid gap-8 lg:grid-cols-[.8fr_1.2fr] lg:items-center"><div><p className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--cyan)]">Prove your level</p><h2 className="mt-2 text-3xl font-bold">Every match counts.</h2><p className="mt-4 max-w-md leading-7 text-[var(--muted)]">Your performance builds your rank. Earn XP, unlock status, and get discovered by a community that values the grind.</p><a href="#signup" className="mt-7 inline-block rounded-lg border border-[var(--line)] px-5 py-3 text-sm font-bold transition hover:border-slate-500">Create your profile</a></div><div className="rounded-2xl border border-[var(--line)] bg-[var(--panel)] p-5"><div className="mb-4 flex items-center justify-between"><h3 className="font-bold">Global leaderboard</h3><span className="text-xs text-[var(--muted)]">This week</span></div>{[["01","Kairo","12,840","Master"],["02","Mira","11,920","Master"],["03","Zed","11,480","Diamond"]].map(([rank,name,xp,tier]) => <div key={rank} className="flex items-center gap-3 border-t border-[var(--line)] py-4"><span className="w-5 text-xs font-bold text-[var(--muted)]">{rank}</span><span className="grid h-9 w-9 place-items-center rounded-full bg-[var(--panel-raised)] text-xs font-bold">{name[0]}</span><span className="flex-1 text-sm font-semibold">{name}</span><span className="hidden text-xs text-[var(--muted)] sm:block">{tier}</span><span className="text-sm font-bold text-[var(--lime)]">{xp} XP</span></div>)}</div></div></section>
+
+        <footer className="flex flex-col gap-4 border-t border-[var(--line)] py-8 text-xs text-[var(--muted)] sm:flex-row sm:items-center sm:justify-between"><p>© 2026 WinOX. Built for the next level.</p><p><span className="mr-2 rounded bg-[var(--panel)] px-2 py-1 text-[var(--lime)]">DEMO</span>Real-money features are disabled in this environment.</p></footer>
+      </div>
+    </main>
+  );
+}
+
+function GameCard({ title, type, accent, icon }: { title: string; type: string; accent: string; icon: string }) {
+  return <a href={`#${title.toLowerCase().replaceAll(" ", "-")}`} className="group rounded-xl border border-[var(--line)] bg-[var(--panel)] p-4 transition hover:-translate-y-1 hover:border-slate-500"><span className={`grid h-12 w-12 place-items-center rounded-lg text-lg font-black ${accent}`}>{icon}</span><h3 className="mt-4 text-sm font-bold">{title}</h3><p className="mt-1 text-xs text-[var(--muted)]">{type}</p></a>;
+}

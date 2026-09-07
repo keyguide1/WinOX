@@ -1,0 +1,385 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  PLAYER
+  MODERATOR
+  ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  RESTRICTED
+  SUSPENDED
+  SELF_EXCLUDED
+}
+
+enum TournamentStatus {
+  DRAFT
+  OPEN
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum MatchStatus {
+  PENDING
+  IN_PROGRESS
+  VERIFIED
+  DISPUTED
+}
+
+enum LedgerAccountType {
+  PLAYER_WALLET
+  PLAYER_LOCKED
+  PLAYER_PENDING
+  PAYMENT_CLEARING
+  TOURNAMENT_ESCROW
+  PRIZE_POOL
+  PLATFORM_REVENUE
+  REFUNDS
+  WITHDRAWAL_CLEARING
+  FEES
+  ADJUSTMENTS
+}
+
+enum LedgerEntryDirection {
+  DEBIT
+  CREDIT
+}
+
+enum RiskLevel {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum RiskDecision {
+  ALLOW
+  MONITOR
+  CHALLENGE
+  REVIEW
+  TEMPORARY_RESTRICTION
+  BLOCK
+}
+
+enum ReviewStatus {
+  OPEN
+  TRIAGED
+  UNDER_REVIEW
+  EVIDENCE_REQUESTED
+  DECISION_PENDING
+  RESOLVED
+  ESCALATED
+  CLOSED
+}
+
+enum SecurityEventType {
+  LOGIN_FAILED
+  LOGIN_SUSPICIOUS
+  SESSION_CREATED
+  SESSION_REVOKED
+  PASSWORD_CHANGED
+  DEVICE_CHANGED
+  BOT_DETECTED
+  CHEAT_SIGNAL_DETECTED
+  MATCH_ANOMALY_DETECTED
+  COLLUSION_SIGNAL_DETECTED
+  MULTI_ACCOUNT_SIGNAL
+  ACCOUNT_TAKEOVER_SIGNAL
+  ADMIN_SECURITY_EVENT
+}
+
+enum ResultSource {
+  SERVER
+  TRUSTED_GAME_API
+  MATCH_SERVER
+  SIGNED_RESULT
+  VERIFIED_REPLAY
+  ADMIN_REVIEW
+}
+
+enum ReadinessStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  READY
+  BLOCKED
+  EXPIRED
+  REQUIRES_REVIEW
+}
+
+model User {
+  id           String        @id @default(uuid()) @db.Uuid
+  email        String        @unique
+  passwordHash String
+  displayName  String        @unique
+  role         UserRole      @default(PLAYER)
+  status       UserStatus    @default(ACTIVE)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  failedLoginCount Int       @default(0)
+  lockedUntil  DateTime?
+  lastLoginAt  DateTime?
+  sessions     Session[]
+  auditEvents  AuditEvent[]  @relation("ActorAuditEvents")
+  wallet       Wallet?
+  tournamentEntries TournamentEntry[]
+  submittedResults MatchResult[]
+  securityEvents SecurityEvent[]
+  riskSignals RiskSignal[]
+  riskCases RiskCase[]
+  realMoneyActivations RealMoneyActivation[]
+}
+
+model Game {
+  id          String   @id @default(uuid()) @db.Uuid
+  slug        String   @unique
+  name        String
+  description String
+  enabled     Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  versions    GameVersion[]
+  tournaments Tournament[]
+}
+
+model GameVersion {
+  id        String   @id @default(uuid()) @db.Uuid
+  gameId    String   @db.Uuid
+  version   String
+  rules     Json
+  createdAt DateTime @default(now())
+  game      Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
+
+  @@unique([gameId, version])
+}
+
+model Tournament {
+  id          String           @id @default(uuid()) @db.Uuid
+  gameId      String           @db.Uuid
+  name        String
+  rules       Json
+  capacity    Int
+  startsAt    DateTime
+  status      TournamentStatus @default(DRAFT)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  game        Game             @relation(fields: [gameId], references: [id])
+  entries     TournamentEntry[]
+  matches     Match[]
+
+  @@index([status, startsAt])
+}
+
+model TournamentEntry {
+  id           String      @id @default(uuid()) @db.Uuid
+  tournamentId String      @db.Uuid
+  userId       String      @db.Uuid
+  createdAt    DateTime    @default(now())
+  tournament   Tournament  @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  user         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([tournamentId, userId])
+  @@index([tournamentId, createdAt])
+}
+
+model Match {
+  id           String      @id @default(uuid()) @db.Uuid
+  tournamentId String      @db.Uuid
+  status       MatchStatus @default(PENDING)
+  scheduledAt  DateTime?
+  verifiedAt   DateTime?
+  tournament   Tournament  @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  results      MatchResult[]
+}
+
+model MatchResult {
+  id         String   @id @default(uuid()) @db.Uuid
+  matchId   String   @db.Uuid
+  submittedBy String @db.Uuid
+  payload    Json
+  source     ResultSource @default(SERVER)
+  verificationMetadata Json?
+  verifiedAt DateTime?
+  createdAt  DateTime @default(now())
+  match      Match    @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  submitter  User     @relation(fields: [submittedBy], references: [id])
+
+  @@unique([matchId, submittedBy])
+}
+
+model Session {
+  id           String   @id @default(uuid()) @db.Uuid
+  userId       String   @db.Uuid
+  tokenHash    String   @unique
+  userAgent    String?
+  ipHash       String?
+  expiresAt    DateTime
+  revokedAt    DateTime?
+  createdAt    DateTime @default(now())
+  lastSeenAt   DateTime @default(now())
+  revokedReason String?
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, revokedAt])
+}
+
+model SecurityEvent {
+  id        String            @id @default(uuid()) @db.Uuid
+  userId    String?           @db.Uuid
+  type      SecurityEventType
+  requestId String?
+  metadata  Json?
+  createdAt DateTime          @default(now())
+  user      User?             @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+  @@index([type, createdAt])
+}
+
+model RiskSignal {
+  id          String    @id @default(uuid()) @db.Uuid
+  userId      String?   @db.Uuid
+  matchId     String?   @db.Uuid
+  tournamentId String?  @db.Uuid
+  type        String
+  level       RiskLevel
+  confidence  Decimal   @db.Decimal(5, 4)
+  evidenceRef String?
+  metadata    Json?
+  createdAt   DateTime  @default(now())
+  user        User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  cases       RiskCaseSignal[]
+
+  @@index([userId, type, createdAt])
+  @@index([level, createdAt])
+}
+
+model RiskCase {
+  id          String       @id @default(uuid()) @db.Uuid
+  userId      String?      @db.Uuid
+  status      ReviewStatus @default(OPEN)
+  level       RiskLevel
+  decision    RiskDecision
+  reason      String
+  reviewerId  String?      @db.Uuid
+  resolvedAt  DateTime?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  user        User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
+  signals     RiskCaseSignal[]
+  evidence    SecurityEvidence[]
+
+  @@index([status, level, createdAt])
+}
+
+model RiskCaseSignal {
+  riskCaseId String @db.Uuid
+  signalId   String @db.Uuid
+  riskCase   RiskCase  @relation(fields: [riskCaseId], references: [id], onDelete: Cascade)
+  signal     RiskSignal @relation(fields: [signalId], references: [id], onDelete: Cascade)
+
+  @@id([riskCaseId, signalId])
+}
+
+model SecurityEvidence {
+  id          String   @id @default(uuid()) @db.Uuid
+  riskCaseId  String?  @db.Uuid
+  reference   String
+  contentHash String?
+  metadata    Json?
+  createdAt   DateTime @default(now())
+  riskCase    RiskCase? @relation(fields: [riskCaseId], references: [id], onDelete: SetNull)
+
+  @@index([riskCaseId, createdAt])
+}
+
+model LaunchReadinessCheck {
+  id             String         @id @default(uuid()) @db.Uuid
+  key            String         @unique
+  status         ReadinessStatus @default(NOT_STARTED)
+  owner          String?
+  evidenceRef    String?
+  lastVerifiedAt DateTime?
+  expiresAt      DateTime?
+  notes          String?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+}
+
+model RealMoneyActivation {
+  id             String   @id @default(uuid()) @db.Uuid
+  environment    String
+  actorId        String?  @db.Uuid
+  requestId      String?
+  configuration  Json
+  readiness      Json
+  activatedAt    DateTime
+  createdAt      DateTime @default(now())
+  actor          User?    @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([environment, activatedAt])
+}
+
+model Wallet {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @unique @db.Uuid
+  currency  String   @default("GHS")
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accounts  LedgerAccount[]
+}
+
+model LedgerTransaction {
+  idempotencyKey String   @unique
+  id            String   @id @default(uuid()) @db.Uuid
+  reason        String
+  reference     String?
+  currency      String
+  createdAt     DateTime  @default(now())
+  entries       LedgerEntry[]
+}
+
+model LedgerAccount {
+  id        String            @id @default(uuid()) @db.Uuid
+  walletId  String?           @db.Uuid
+  type      LedgerAccountType
+  currency  String
+  createdAt DateTime          @default(now())
+  wallet    Wallet?           @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  entries   LedgerEntry[]
+
+  @@unique([walletId, type, currency])
+  @@index([type, currency])
+}
+
+model LedgerEntry {
+  id            String              @id @default(uuid()) @db.Uuid
+  transactionId String              @db.Uuid
+  accountId     String              @db.Uuid
+  amount        Decimal             @db.Decimal(20, 2)
+  direction     LedgerEntryDirection
+  createdAt     DateTime            @default(now())
+  transaction   LedgerTransaction   @relation(fields: [transactionId], references: [id])
+  account       LedgerAccount       @relation(fields: [accountId], references: [id])
+
+  @@index([accountId, createdAt])
+}
+
+model AuditEvent {
+  id        String   @id @default(uuid()) @db.Uuid
+  actorId   String?  @db.Uuid
+  action    String
+  targetId  String?
+  metadata  Json?
+  createdAt DateTime @default(now())
+  actor     User?    @relation("ActorAuditEvents", fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([actorId, createdAt])
+}
