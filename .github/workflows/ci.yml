@@ -19,27 +19,20 @@ jobs:
         with:
           node-version: 20
           cache: npm
-          cache-dependency-path: win-ox/package-lock.json
+          cache-dependency-path: package-lock.json
       - name: Install dependencies
-        working-directory: win-ox
         run: npm ci
       - name: Lint
-        working-directory: win-ox
         run: npm run lint
       - name: Type check
-        working-directory: win-ox
         run: npm run typecheck
       - name: Generate Prisma client
-        working-directory: win-ox
         run: npm run db:generate
       - name: Validate Prisma schema
-        working-directory: win-ox
         run: npx prisma validate
       - name: Run foundation tests
-        working-directory: win-ox
         run: npm test
       - name: Production build
-        working-directory: win-ox
         run: npm run build
 
   postgres-integration:
@@ -70,19 +63,14 @@ jobs:
         with:
           node-version: 20
           cache: npm
-          cache-dependency-path: win-ox/package-lock.json
+          cache-dependency-path: package-lock.json
       - name: Install dependencies
-        working-directory: win-ox
         run: npm ci
       - name: Generate Prisma client
-        working-directory: win-ox
         run: npm run db:generate
       - name: Validate Prisma schema
-        working-directory: win-ox
         run: npx prisma validate
       - name: Apply migrations to disposable PostgreSQL
-        working-directory: win-ox
         run: npm run db:migrate:deploy
       - name: Run PostgreSQL integration tests
-        working-directory: win-ox
         run: npm run test:integration
